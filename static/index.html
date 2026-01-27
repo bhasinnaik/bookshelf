@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookshelf Manager</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📚 Bookshelf Manager</h1>
+                <p class="tagline">Organize and manage your book collection</p>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-btn active" data-tab="books">Books</button>
+            <button class="nav-btn" data-tab="bookshelves">Bookshelves</button>
+            <button class="nav-btn" data-tab="add-book">Add Book</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Books Tab -->
+            <div id="books" class="tab-content active">
+                <div class="section-header">
+                    <h2>All Books</h2>
+                    <div class="filters">
+                        <input type="text" id="authorFilter" placeholder="Filter by author...">
+                        <input type="text" id="genreFilter" placeholder="Filter by genre...">
+                        <button id="filterBtn" class="btn btn-secondary">Filter</button>
+                        <button id="clearFilterBtn" class="btn btn-secondary">Clear</button>
+                    </div>
+                </div>
+                <div id="booksList" class="books-grid">
+                    <p class="loading">Loading books...</p>
+                </div>
+            </div>
+
+            <!-- Bookshelves Tab -->
+            <div id="bookshelves" class="tab-content">
+                <div class="section-header">
+                    <h2>My Bookshelves</h2>
+                    <div class="shelf-actions">
+                        <input type="text" id="shelfName" placeholder="Bookshelf name...">
+                        <input type="text" id="shelfOwner" placeholder="Owner name...">
+                        <button id="createShelfBtn" class="btn btn-primary">Create Shelf</button>
+                    </div>
+                </div>
+                <div id="shelvesList" class="shelves-grid">
+                    <p class="loading">Loading bookshelves...</p>
+                </div>
+            </div>
+
+            <!-- Add Book Tab -->
+            <div id="add-book" class="tab-content">
+                <div class="section-header">
+                    <h2>Add New Book</h2>
+                </div>
+                <form id="addBookForm" class="form">
+                    <div class="form-group">
+                        <label for="bookTitle">Title *</label>
+                        <input type="text" id="bookTitle" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bookAuthor">Author *</label>
+                            <input type="text" id="bookAuthor" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookISBN">ISBN *</label>
+                            <input type="text" id="bookISBN" placeholder="10 or 13 digits" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bookYear">Publication Year *</label>
+                            <input type="number" id="bookYear" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookPages">Pages *</label>
+                            <input type="number" id="bookPages" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookGenre">Genre *</label>
+                            <input type="text" id="bookGenre" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookDescription">Description</label>
+                        <textarea id="bookDescription" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">Add Book</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Book Details -->
+    <div id="bookModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Modal for Shelf Details -->
+    <div id="shelfModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="shelfModalBody"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
