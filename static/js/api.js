@@ -29,6 +29,7 @@ const api = {
         }
     },
 
+
     // Books API
     books: {
         list: (params = {}) => {
@@ -50,6 +51,18 @@ const api = {
         }),
 
         delete: (id) => api.request(`/books/${id}`, {
+            method: 'DELETE',
+        }),
+    },
+
+    // Reviews API
+    reviews: {
+        list: (bookId) => api.request(`/books/${bookId}/reviews`),
+        create: (bookId, data) => api.request(`/books/${bookId}/reviews`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+        delete: (bookId, reviewId) => api.request(`/books/${bookId}/reviews/${reviewId}`, {
             method: 'DELETE',
         }),
     },

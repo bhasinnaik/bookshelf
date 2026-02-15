@@ -152,7 +152,39 @@ async function showBookDetails(bookId) {
     try {
         const book = await api.books.get(bookId);
         const modalBody = document.getElementById('modalBody');
-        
+
+        // Reviews section
+        let reviewsHtml = '';
+        if (book.reviews && book.reviews.length > 0) {
+            reviewsHtml = `
+                <h3>Reviews</h3>
+                <ul class="reviews-list">
+                    ${book.reviews.map(r => `
+                        <li>
+                            <strong>${escapeHtml(r.reviewer)}</strong> 
+                            <span class="review-rating">${r.rating}/5</span>
+                            <span class="review-date">${new Date(r.created_at).toLocaleDateString()}</span><br>
+                            ${r.comment ? `<span class="review-comment">${escapeHtml(r.comment)}</span><br>` : ''}
+                            <button class="btn btn-danger btn-xs" onclick="deleteReview(${book.id}, ${r.id})">Delete</button>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        } else {
+            reviewsHtml = '<h3>Reviews</h3><p>No reviews yet.</p>';
+        }
+
+        // Add review form
+        const addReviewForm = `
+            <h4>Add a Review</h4>
+            <form id="addReviewForm">
+                <input type="text" id="reviewerName" placeholder="Your name" required style="margin-bottom:5px;width:100%"><br>
+                <input type="number" id="reviewRating" min="0" max="5" step="0.1" placeholder="Rating (0-5)" required style="margin-bottom:5px;width:100%"><br>
+                <textarea id="reviewComment" placeholder="Comment (optional)" rows="2" style="margin-bottom:5px;width:100%"></textarea><br>
+                <button type="submit" class="btn btn-primary btn-xs">Submit Review</button>
+            </form>
+        `;
+
         modalBody.innerHTML = `
             <h2>${escapeHtml(book.title)}</h2>
             <p><strong>Author:</strong> ${escapeHtml(book.author)}</p>
@@ -162,7 +194,45 @@ async function showBookDetails(bookId) {
             <p><strong>Genre:</strong> <span class="book-genre">${escapeHtml(book.genre)}</span></p>
             ${book.description ? `<p><strong>Description:</strong> ${escapeHtml(book.description)}</p>` : ''}
             <p><strong>Added:</strong> ${new Date(book.created_at).toLocaleDateString()}</p>
+            <hr>
+            ${reviewsHtml}
+            <hr>
+            ${addReviewForm}
         `;
+
+        // Add review form handler
+        const addReviewFormEl = document.getElementById('addReviewForm');
+        if (addReviewFormEl) {
+            addReviewFormEl.onsubmit = async (e) => {
+                e.preventDefault();
+                const reviewer = document.getElementById('reviewerName').value.trim();
+                const rating = parseFloat(document.getElementById('reviewRating').value);
+                const comment = document.getElementById('reviewComment').value.trim();
+                if (!reviewer || isNaN(rating) || rating < 0 || rating > 5) {
+                    showAlert('Please enter a valid name and rating (0-5)', 'error');
+                    return;
+                }
+                try {
+                    await api.reviews.create(book.id, { reviewer, rating, comment });
+                    showAlert('Review added!', 'success');
+                    showBookDetails(book.id); // reload modal
+                } catch (err) {
+                    showAlert('Error adding review: ' + err.message, 'error');
+                }
+            };
+        }
+
+        // Expose deleteReview globally for inline onclick
+        window.deleteReview = async (bookId, reviewId) => {
+            if (!confirm('Delete this review?')) return;
+            try {
+                await api.reviews.delete(bookId, reviewId);
+                showAlert('Review deleted!', 'success');
+                showBookDetails(bookId);
+            } catch (err) {
+                showAlert('Error deleting review: ' + err.message, 'error');
+            }
+        };
 
         bookModal.style.display = 'block';
     } catch (error) {
