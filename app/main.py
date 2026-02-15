@@ -8,10 +8,11 @@ from sqlalchemy.orm import Session
 from app.database import engine, get_db, Base
 from app.models import (
     Book, BookCreate, BookUpdate, Bookshelf,
-    BookDB, BookshelfDB
+    BookDB, BookshelfDB,
+    Review, ReviewCreate, ReviewDB
 )
 
-# Create all tables
+# Create all tables (including reviews)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -81,6 +82,7 @@ async def health_check():
     """Health check endpoint."""
     return {"status": "healthy", "service": "Bookshelf API"}
 
+
 # ==================== Book Endpoints ====================
 
 @app.get("/books", response_model=List[Book])
@@ -104,11 +106,43 @@ async def list_books(
 
 @app.get("/books/{book_id}", response_model=Book)
 async def get_book(book_id: int, db: Session = Depends(get_db)):
-    """Get a specific book by ID."""
+    """Get a specific book by ID, including reviews."""
     book = db.query(BookDB).filter(BookDB.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail=f"Book with id {book_id} not found")
     return book
+
+# ==================== Review Endpoints ====================
+
+@app.post("/books/{book_id}/reviews", response_model=Review, status_code=201)
+async def create_review(book_id: int, review: ReviewCreate, db: Session = Depends(get_db)):
+    """Create a review for a book."""
+    book = db.query(BookDB).filter(BookDB.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail=f"Book with id {book_id} not found")
+    review_db = ReviewDB(**review.dict(), book_id=book_id)
+    db.add(review_db)
+    db.commit()
+    db.refresh(review_db)
+    return review_db
+
+@app.get("/books/{book_id}/reviews", response_model=List[Review])
+async def list_reviews(book_id: int, db: Session = Depends(get_db)):
+    """List all reviews for a book."""
+    book = db.query(BookDB).filter(BookDB.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail=f"Book with id {book_id} not found")
+    return book.reviews
+
+@app.delete("/books/{book_id}/reviews/{review_id}")
+async def delete_review(book_id: int, review_id: int, db: Session = Depends(get_db)):
+    """Delete a review for a book."""
+    review = db.query(ReviewDB).filter(ReviewDB.id == review_id, ReviewDB.book_id == book_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail=f"Review with id {review_id} not found for book {book_id}")
+    db.delete(review)
+    db.commit()
+    return {"message": "Review deleted successfully", "review_id": review_id}
 
 @app.post("/books", response_model=Book, status_code=201)
 async def create_book(book: BookCreate, db: Session = Depends(get_db)):

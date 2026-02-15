@@ -36,6 +36,25 @@ class BookDB(Base):
         secondary=bookshelf_books,
         back_populates="books"
     )
+    # Reviews relationship
+    reviews = relationship("ReviewDB", back_populates="book", cascade="all, delete-orphan")
+
+
+# ==================== Review Model ====================
+from sqlalchemy import Float
+
+class ReviewDB(Base):
+    """SQLAlchemy model for Book Review."""
+    __tablename__ = "reviews"
+    id = Column(Integer, primary_key=True, index=True)
+    book_id = Column(Integer, ForeignKey("books.id"), nullable=False, index=True)
+    reviewer = Column(String(100), nullable=False)
+    rating = Column(Float, nullable=False)
+    comment = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationship
+    book = relationship("BookDB", back_populates="reviews")
 
 class BookshelfDB(Base):
     """SQLAlchemy model for Bookshelf."""
@@ -73,6 +92,38 @@ class Item(ItemBase):
     """Item response model."""
     id: int
     
+    class Config:
+        from_attributes = True
+
+# ==================== Review Pydantic Models ====================
+
+class ReviewBase(BaseModel):
+    reviewer: str
+    rating: float = Field(..., ge=0, le=5)
+    comment: Optional[str] = None
+
+class ReviewCreate(ReviewBase):
+    pass
+
+class Review(ReviewBase):
+    id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class Book(BaseModel):
+    """Book model with ID and metadata."""
+    id: int
+    title: str
+    author: str
+    isbn: str
+    publication_year: int
+    pages: int
+    genre: str
+    description: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    reviews: List[Review] = []
     class Config:
         from_attributes = True
 
