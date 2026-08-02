@@ -1,36 +1,149 @@
-// DOM Elements
-const navButtons = document.querySelectorAll('.nav-btn');
-const tabContents = document.querySelectorAll('.tab-content');
-const booksList = document.getElementById('booksList');
-const shelvesList = document.getElementById('shelvesList');
-const addBookForm = document.getElementById('addBookForm');
-const createShelfBtn = document.getElementById('createShelfBtn');
-const filterBtn = document.getElementById('filterBtn');
-const clearFilterBtn = document.getElementById('clearFilterBtn');
-const bookModal = document.getElementById('bookModal');
-const shelfModal = document.getElementById('shelfModal');
-const modalClose = document.querySelectorAll('.close');
+let navButtons;
+let tabContents;
+let booksList;
+let shelvesList;
+let addBookForm;
+let createShelfBtn;
+let filterBtn;
+let clearFilterBtn;
+let bookModal;
+let shelfModal;
+let modalClose;
 
-// Event Listeners
-navButtons.forEach(btn => {
-    btn.addEventListener('click', handleTabSwitch);
-});
+function renderApp() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <div id="books" class="tab-content active">
+            <div class="section-header">
+                <h2>All Books</h2>
+                <div class="filters">
+                    <input type="text" id="authorFilter" placeholder="Filter by author...">
+                    <input type="text" id="genreFilter" placeholder="Filter by genre...">
+                    <button id="filterBtn" class="btn btn-secondary">Filter</button>
+                    <button id="clearFilterBtn" class="btn btn-secondary">Clear</button>
+                </div>
+            </div>
+            <div id="booksList" class="books-grid">
+                <p class="loading">Loading books...</p>
+            </div>
+        </div>
+        <div id="bookshelves" class="tab-content">
+            <div class="section-header">
+                <h2>My Bookshelves</h2>
+                <div class="shelf-actions">
+                    <input type="text" id="shelfName" placeholder="Bookshelf name...">
+                    <input type="text" id="shelfOwner" placeholder="Owner name...">
+                    <button id="createShelfBtn" class="btn btn-primary">Create Shelf</button>
+                </div>
+            </div>
+            <div id="shelvesList" class="shelves-grid">
+                <p class="loading">Loading bookshelves...</p>
+            </div>
+        </div>
+        <div id="add-book" class="tab-content">
+            <div class="section-header">
+                <h2>Add New Book</h2>
+            </div>
+            <form id="addBookForm" class="form">
+                <div class="form-group">
+                    <label for="bookTitle">Title *</label>
+                    <input type="text" id="bookTitle" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bookAuthor">Author *</label>
+                        <input type="text" id="bookAuthor" required>
+                    </div>
+                    <div class="form-group isbn-group">
+                        <label for="bookISBN">ISBN *</label>
+                        <div class="isbn-input-row">
+                            <input type="text" id="bookISBN" placeholder="10 or 13 digits" required>
+                            <button id="lookupIsbnBtn" type="button" class="btn btn-secondary btn-sm">Find ISBN</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bookYear">Publication Year *</label>
+                        <input type="number" id="bookYear" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookPages">Pages *</label>
+                        <input type="number" id="bookPages" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookGenre">Genre *</label>
+                        <input type="text" id="bookGenre" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="bookDescription">Description</label>
+                    <textarea id="bookDescription" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-large">Add Book</button>
+            </form>
+        </div>
+    `;
+}
 
-addBookForm.addEventListener('submit', handleAddBook);
-createShelfBtn.addEventListener('click', handleCreateShelf);
-filterBtn.addEventListener('click', handleFilterBooks);
-clearFilterBtn.addEventListener('click', handleClearFilter);
+function bindUI() {
+    navButtons = document.querySelectorAll('.nav-btn');
+    tabContents = document.querySelectorAll('.tab-content');
+    booksList = document.getElementById('booksList');
+    shelvesList = document.getElementById('shelvesList');
+    addBookForm = document.getElementById('addBookForm');
+    createShelfBtn = document.getElementById('createShelfBtn');
+    filterBtn = document.getElementById('filterBtn');
+    clearFilterBtn = document.getElementById('clearFilterBtn');
+    bookModal = document.getElementById('bookModal');
+    shelfModal = document.getElementById('shelfModal');
+    modalClose = document.querySelectorAll('.close');
 
-modalClose.forEach(closeBtn => {
-    closeBtn.addEventListener('click', (e) => {
-        e.target.closest('.modal').style.display = 'none';
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', handleTabSwitch);
     });
-});
 
-window.addEventListener('click', (e) => {
-    if (e.target === bookModal) bookModal.style.display = 'none';
-    if (e.target === shelfModal) shelfModal.style.display = 'none';
-});
+    addBookForm.addEventListener('submit', handleAddBook);
+    createShelfBtn.addEventListener('click', handleCreateShelf);
+    filterBtn.addEventListener('click', handleFilterBooks);
+    clearFilterBtn.addEventListener('click', handleClearFilter);
+
+    const lookupIsbnBtn = document.getElementById('lookupIsbnBtn');
+    if (lookupIsbnBtn) {
+        lookupIsbnBtn.addEventListener('click', handleLookupIsbn);
+    }
+
+    modalClose.forEach(closeBtn => {
+        closeBtn.addEventListener('click', (e) => {
+            e.target.closest('.modal').style.display = 'none';
+        });
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === bookModal) bookModal.style.display = 'none';
+        if (e.target === shelfModal) shelfModal.style.display = 'none';
+    });
+}
+
+function setMobileTabLabel(tabName) {
+    const label = document.getElementById('mobileTabLabel');
+    if (!label) return;
+
+    const titles = {
+        books: 'All Books',
+        bookshelves: 'Bookshelves',
+        'add-book': 'Add Book',
+    };
+
+    label.textContent = titles[tabName] || 'Books';
+}
+
+function initializeUI() {
+    renderApp();
+    bindUI();
+    setMobileTabLabel('books');
+    loadBooks();
+}
 
 // Tab Switching
 function handleTabSwitch(e) {
@@ -39,6 +152,7 @@ function handleTabSwitch(e) {
     // Update active nav button
     navButtons.forEach(btn => btn.classList.remove('active'));
     e.target.classList.add('active');
+    setMobileTabLabel(tabName);
 
     // Show active tab
     tabContents.forEach(content => content.classList.remove('active'));
@@ -68,8 +182,8 @@ async function loadBooks() {
                 <h3>${escapeHtml(book.title)}</h3>
                 <p class="author">by ${escapeHtml(book.author)}</p>
                 <div class="book-meta">
-                    <div>📅 ${book.publication_year}</div>
-                    <div>📖 ${book.pages} pages</div>
+                    <div>Year: ${book.publication_year}</div>
+                    <div>Pages: ${book.pages} pages</div>
                     <div>ISBN: ${book.isbn}</div>
                 </div>
                 <span class="book-genre">${escapeHtml(book.genre)}</span>
@@ -363,7 +477,25 @@ async function removeBookFromShelf(shelfId, bookId) {
     }
 }
 
-// Filter Books
+// ISBN Lookup
+async function handleLookupIsbn() {
+    const title = document.getElementById('bookTitle').value.trim();
+    const author = document.getElementById('bookAuthor').value.trim();
+
+    if (!title || !author) {
+        showAlert('Please enter both title and author to lookup ISBN.', 'error');
+        return;
+    }
+
+    try {
+        const result = await api.books.lookupIsbn(title, author);
+        document.getElementById('bookISBN').value = result.isbn;
+        showAlert('ISBN found and filled in.', 'success');
+    } catch (error) {
+        showAlert(`Could not find ISBN: ${error.message}`, 'error');
+    }
+}
+
 async function handleFilterBooks() {
     const author = document.getElementById('authorFilter').value.trim();
     const genre = document.getElementById('genreFilter').value.trim();
@@ -386,8 +518,8 @@ async function handleFilterBooks() {
                 <h3>${escapeHtml(book.title)}</h3>
                 <p class="author">by ${escapeHtml(book.author)}</p>
                 <div class="book-meta">
-                    <div>📅 ${book.publication_year}</div>
-                    <div>📖 ${book.pages} pages</div>
+                    <div>Year: ${book.publication_year}</div>
+                    <div>Pages: ${book.pages} pages</div>
                     <div>ISBN: ${book.isbn}</div>
                 </div>
                 <span class="book-genre">${escapeHtml(book.genre)}</span>
@@ -427,5 +559,5 @@ function escapeHtml(text) {
 
 // Initial Load
 window.addEventListener('load', () => {
-    loadBooks();
+    initializeUI();
 });

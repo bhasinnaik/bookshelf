@@ -22,82 +22,10 @@
             <button class="nav-btn" data-tab="bookshelves">Bookshelves</button>
             <button class="nav-btn" data-tab="add-book">Add Book</button>
         </nav>
+        <div id="mobileTabLabel" class="mobile-tab-label">All Books</div>
 
         <!-- Main Content -->
-        <main class="main">
-            <!-- Books Tab -->
-            <div id="books" class="tab-content active">
-                <div class="section-header">
-                    <h2>All Books</h2>
-                    <div class="filters">
-                        <input type="text" id="authorFilter" placeholder="Filter by author...">
-                        <input type="text" id="genreFilter" placeholder="Filter by genre...">
-                        <button id="filterBtn" class="btn btn-secondary">Filter</button>
-                        <button id="clearFilterBtn" class="btn btn-secondary">Clear</button>
-                    </div>
-                </div>
-                <div id="booksList" class="books-grid">
-                    <p class="loading">Loading books...</p>
-                </div>
-            </div>
-
-            <!-- Bookshelves Tab -->
-            <div id="bookshelves" class="tab-content">
-                <div class="section-header">
-                    <h2>My Bookshelves</h2>
-                    <div class="shelf-actions">
-                        <input type="text" id="shelfName" placeholder="Bookshelf name...">
-                        <input type="text" id="shelfOwner" placeholder="Owner name...">
-                        <button id="createShelfBtn" class="btn btn-primary">Create Shelf</button>
-                    </div>
-                </div>
-                <div id="shelvesList" class="shelves-grid">
-                    <p class="loading">Loading bookshelves...</p>
-                </div>
-            </div>
-
-            <!-- Add Book Tab -->
-            <div id="add-book" class="tab-content">
-                <div class="section-header">
-                    <h2>Add New Book</h2>
-                </div>
-                <form id="addBookForm" class="form">
-                    <div class="form-group">
-                        <label for="bookTitle">Title *</label>
-                        <input type="text" id="bookTitle" required>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="bookAuthor">Author *</label>
-                            <input type="text" id="bookAuthor" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="bookISBN">ISBN *</label>
-                            <input type="text" id="bookISBN" placeholder="10 or 13 digits" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="bookYear">Publication Year *</label>
-                            <input type="number" id="bookYear" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="bookPages">Pages *</label>
-                            <input type="number" id="bookPages" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="bookGenre">Genre *</label>
-                            <input type="text" id="bookGenre" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="bookDescription">Description</label>
-                        <textarea id="bookDescription" rows="4"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-large">Add Book</button>
-                </form>
-            </div>
-        </main>
+        <main id="app" class="main"></main>
     </div>
 
     <!-- Modal for Book Details -->
