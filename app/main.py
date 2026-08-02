@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from typing import Optional, List
 from datetime import datetime
 import os
+import httpx
 from sqlalchemy.orm import Session
 from app.database import engine, get_db, Base
 from app.models import (
@@ -103,6 +104,34 @@ async def list_books(
     
     books = query.offset(skip).limit(limit).all()
     return books
+
+@app.get("/books/lookup-isbn")
+async def lookup_isbn(title: str = Query(...), author: str = Query(...)):
+    """Lookup ISBN for a book by title and author."""
+    query = {
+        "title": title,
+        "author": author,
+        "limit": 1,
+        "fields": "isbn,title,author_name"
+    }
+    url = "https://openlibrary.org/search.json"
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.get(url, params=query)
+        if response.status_code != 200:
+            raise HTTPException(status_code=502, detail="Failed to query ISBN service")
+        data = response.json()
+
+    docs = data.get("docs", [])
+    if not docs:
+        raise HTTPException(status_code=404, detail="ISBN not found for this title and author")
+
+    first = docs[0]
+    isbns = first.get("isbn", [])
+    if not isbns:
+        raise HTTPException(status_code=404, detail="ISBN not available for this title and author")
+
+    isbn = next((i for i in isbns if len(i) == 13), isbns[0])
+    return {"isbn": isbn}
 
 @app.get("/books/{book_id}", response_model=Book)
 async def get_book(book_id: int, db: Session = Depends(get_db)):

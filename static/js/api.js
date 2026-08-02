@@ -40,6 +40,11 @@ const api = {
 
         get: (id) => api.request(`/books/${id}`),
 
+        lookupIsbn: (title, author) => {
+            const queryString = new URLSearchParams({ title, author }).toString();
+            return api.request(`/books/lookup-isbn?${queryString}`);
+        },
+
         create: (data) => api.request('/books', {
             method: 'POST',
             body: JSON.stringify(data),
